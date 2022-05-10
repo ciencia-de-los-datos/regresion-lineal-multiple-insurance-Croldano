@@ -84,46 +84,54 @@ def pregunta_03():
             # variables categóricas, y no aplica ninguna transformación al resto de
             # las variables.
             (
-                'column_transfomer',
+                "column_transfomer",
                 make_column_transformer(
                     (
-                        OneHotEncoder(),
-                        make_column_selector(dtype_include=object),
+                       'OneHot',
+                        OneHotEncoder(categories='auto'),
                     ),
-                    remainder='passthrough',
+                    remainder='passthrough',#'drop'
                 ),
             ),
             # Paso 2: Construya un selector de características que seleccione las K
             # características más importantes. Utilice la función f_regression.
             (
-                'selectkbest',
-                SelectKBest(score_func=f_regression),
+                "selectKBest",
+                SelectKBest(score_func=f_regression) # se puede especificar k=10),
             ),
             # Paso 3: Construya un modelo de regresión lineal.
             (
-                'Linearregres',
+                "LR",
                 LinearRegression(),
             ),
         ],
     )
 
     # Cargua de las variables.
-    X_train, x_test, y_train, y_test = pregunta_02()
+    X_train, X_test, y_train, y_test = pregunta_02()
 
     # Defina un diccionario de parámetros para el GridSearchCV. Se deben
     # considerar valores desde 1 hasta 11 regresores para el modelo
-    param_grid = {'selectkbest__k': np.arange(1, 12,1)}
+    param_grid = {
+        ____: ____(____, ____),
+    }
+    param_grid = {
+        'LR__n_stimators': np.linspace(1, 11),#regressor
+    }
+    #estimator.get_params().keys()
 
     # Defina una instancia de GridSearchCV con el pipeline y el diccionario de
     # parámetros. Use cv = 5, y como métrica de evaluación el valor negativo del
     # error cuadrático medio.
-    gridSearchCV = GridSearchCV(
-        estimator=pipeline,
-        param_grid=param_grid,
+    #from sklearn.metrics import make_scorer, mean_squared_error
+    #mse = make_scorer(mean_squared_error,greater_is_better=False)
+    gridSearchCV= GridSearchCV(
+        estimator= pipeline,
+        param_grid= param_grid,
         cv=5,
         scoring='neg_mean_squared_error',
-        refit=True,
-        return_train_score=True,
+        refit=True, #usa todo el conjunto de entrenamiento para reajustar el modelo.
+        return_train_score=True,  #If False, the cv_results_ attribute will not include training scores
     )
 
     # Búsque la mejor combinación de regresores
