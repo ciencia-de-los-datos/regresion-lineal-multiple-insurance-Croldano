@@ -64,6 +64,7 @@ def pregunta_03():
     """
 
     # Importe make_column_selector
+    # Importe make_column_selector
     # Importe make_column_transformer
     # Importe SelectKBest
     # Importe f_regression
@@ -72,7 +73,7 @@ def pregunta_03():
     # Importe Pipeline
     # Importe OneHotEncoder
     from sklearn.compose import make_column_selector, make_column_transformer
-    from sklearn.feature_selection import SelectKBest, f_regression
+    from sklearn.feature_selection import SelectKBest,f_regression
     from sklearn.linear_model import LinearRegression
     from sklearn.model_selection import GridSearchCV
     from sklearn.pipeline import Pipeline
@@ -83,25 +84,26 @@ def pregunta_03():
             # Paso 1: Construya un column_transformer que aplica OneHotEncoder a las
             # variables categóricas, y no aplica ninguna transformación al resto de
             # las variables.
+            #OneHotEncoder: vuelve variables categoricas en valores numericos
             (
                 "column_transfomer",
                 make_column_transformer(
                     (
-                       'OneHot',
-                        OneHotEncoder(categories='auto'),
+                        OneHotEncoder(),
+                        make_column_selector(dtype_include=object),
                     ),
-                    remainder='passthrough',#'drop'
+                    remainder="passthrough",
                 ),
             ),
             # Paso 2: Construya un selector de características que seleccione las K
             # características más importantes. Utilice la función f_regression.
             (
-                "selectKBest",
-                SelectKBest(score_func=f_regression) # se puede especificar k=10),
+                "selectkbest",
+                SelectKBest(score_func= f_regression),
             ),
             # Paso 3: Construya un modelo de regresión lineal.
             (
-                "LR",
+                "linearregres",
                 LinearRegression(),
             ),
         ],
@@ -110,28 +112,20 @@ def pregunta_03():
     # Cargua de las variables.
     X_train, X_test, y_train, y_test = pregunta_02()
 
+
     # Defina un diccionario de parámetros para el GridSearchCV. Se deben
     # considerar valores desde 1 hasta 11 regresores para el modelo
-    param_grid = {
-        ____: ____(____, ____),
-    }
-    param_grid = {
-        'LR__n_stimators': np.linspace(1, 11),#regressor
-    }
-    #estimator.get_params().keys()
-
+    param_grid = {"selectkbest__k": np.arange(1 , 12, 1) }
     # Defina una instancia de GridSearchCV con el pipeline y el diccionario de
     # parámetros. Use cv = 5, y como métrica de evaluación el valor negativo del
-    # error cuadrático medio.
-    #from sklearn.metrics import make_scorer, mean_squared_error
-    #mse = make_scorer(mean_squared_error,greater_is_better=False)
-    gridSearchCV= GridSearchCV(
-        estimator= pipeline,
+    # error cuadrático medio.                   
+    gridSearchCV = GridSearchCV(
+        estimator=pipeline,
         param_grid= param_grid,
         cv=5,
-        scoring='neg_mean_squared_error',
-        refit=True, #usa todo el conjunto de entrenamiento para reajustar el modelo.
-        return_train_score=True,  #If False, the cv_results_ attribute will not include training scores
+        scoring="neg_mean_squared_error",
+        refit=True,
+        return_train_score=True,
     )
 
     # Búsque la mejor combinación de regresores
